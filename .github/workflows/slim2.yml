@@ -183,7 +183,8 @@ jobs:
           set -euxo pipefail
           pip install --quiet pillow
           python3 tools/make_branding.py --apk base/test.apk --icon base/icon.png \
-            --outdir work/branding --rename "只音=Apertus" --package com.apertus.music 2>&1 | tee work/branding.log
+            --outdir work/branding --rename "只音=Apertus" --package com.apertus.music \
+              --foreground-id 0x7f0801d1 --legacy-logo-id 0x7f0801ce 2>&1 | tee work/branding.log
           grep '^--set ' work/branding.log | tr '\n' ' ' > work/branding.args
           # 预期 10 密度图标 + 4 开屏 logo 引用 + 1 arsc = 15 条。
           # 少于 13 条说明品牌替换没生效, 直接失败, 绝不静默出包 (踩过: PIL 缺失导致 0 条)
