@@ -171,7 +171,7 @@ jobs:
             --dim iconSize=0x1401=0x2001 \
             --dim layout_width=0x3401=0x4401 \
             --dim layout_height=0x3401=0x4401 \
-            -o work/layout_patched.xml --print-entry)
+            -o work/layout_patched.xml --print-entry || true)
           echo "$OUT"
           ENTRY=$(echo "$OUT" | sed -n 's/^ENTRY=//p')
             # 4.0.0 把首页快捷入口改版了: icon_date_range / icon_article 已无任何布局引用,
