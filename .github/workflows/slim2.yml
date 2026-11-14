@@ -174,8 +174,15 @@ jobs:
             -o work/layout_patched.xml --print-entry)
           echo "$OUT"
           ENTRY=$(echo "$OUT" | sed -n 's/^ENTRY=//p')
-          [ -n "$ENTRY" ] || { echo "★ 图标补丁未命中"; exit 1; }
-          echo "PATCHED_LAYOUT=$ENTRY" >> "$GITHUB_ENV"
+            # 4.0.0 把首页快捷入口改版了: icon_date_range / icon_article 已无任何布局引用,
+            # 原来"一个布局放 4 个图标"的结构不存在。这项只是外观美化, 找不到就跳过。
+            if [ -n "$ENTRY" ]; then
+              echo "LAYOUT_ARG=--set $ENTRY=work/layout_patched.xml" >> "$GITHUB_ENV"
+              echo "图标补丁命中: $ENTRY"
+            else
+              echo "LAYOUT_ARG=" >> "$GITHUB_ENV"
+              echo "○ 未找到旧结构的快捷入口布局, 跳过图标美化"
+            fi
 
       - name: 品牌替换 (图标 + 应用名 -> Apertus)
         run: |
@@ -234,13 +241,13 @@ jobs:
           # slim2: 纯干净交付版 (无任何日志代码)
           python3 tools/repack.py base/test.apk out/slim2-unsigned.apk \
             --set AndroidManifest.xml=work/am/AndroidManifest.xml \
-            --set "$PATCHED_LAYOUT=work/layout_patched.xml" \
+            $LAYOUT_ARG \
             $(cat work/branding.args) $SETS $DROPS
           # slim2dbg: 仅 classes7 换成带探针版, 其余完全一致; 同签名可互相覆盖安装
           SETS_DBG=$(echo "$SETS" | sed 's|classes7.dex=work/new_dex/classes7.dex|classes7.dex=work/dex_dbg/classes7.dex|')
           python3 tools/repack.py base/test.apk out/slim2dbg-unsigned.apk \
             --set AndroidManifest.xml=work/am/AndroidManifest.xml \
-            --set "$PATCHED_LAYOUT=work/layout_patched.xml" \
+            $LAYOUT_ARG \
             $(cat work/branding.args) $SETS_DBG $DROPS
 
       - name: 对齐 + 签名
